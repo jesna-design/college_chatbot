@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Multilingual Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .language-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            background: #34495e;
+        }
+        
+        .lang-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 50px;
+            background: #ecf0f1;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .lang-btn.active {
+            background: #3498db;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f8f9fa"/><path d="M0 50 L100 50 M50 0 L50 100" stroke="%23e9ecef" stroke-width="1"/></svg>');
+        }
+        
+        .message {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            line-height: 1.4;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background: #3498db;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .bot-message {
+            align-self: flex-start;
+            background: #ecf0f1;
+            color: #2c3e50;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .input-area {
+            display: flex;
+            padding: 15px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        #user-input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 1px solid #ddd;
+            border-radius: 50px;
+            outline: none;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        #user-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        #send-btn {
+            margin-left: 10px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 50px;
+            background: #2ecc71;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        #send-btn:hover {
+            background: #27ae60;
+            transform: scale(1.05);
+        }
+        
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .quick-reply {
+            padding: 8px 15px;
+            border: 1px solid #3498db;
+            border-radius: 50px;
+            background: white;
+            color: #3498db;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .quick-reply:hover {
+            background: #3498db;
+            color: white;
+        }
+        
+        .timestamp {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .message {
+                max-width: 85%;
+            }
+            
+            .lang-btn {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>College Campus Assistant</h1>
+            <p>Ask me about fees, scholarships, timetables, and more</p>
+        </div>
+        
+        <div class="language-selector">
+            <button class="lang-btn active" data-lang="en">English</button>
+            <button class="lang-btn" data-lang="hi">Hindi</button>
+            <button class="lang-btn" data-lang="ta">Tamil</button>
+            <button class="lang-btn" data-lang="te">Telugu</button>
+            <button class="lang-btn" data-lang="bn">Bengali</button>
+        </div>
+        
+        <div class="chat-container" id="chat-box">
+            <div class="message bot-message">
+                Hello! I'm your campus assistant. How can I help you today?
+                <div class="timestamp">Just now</div>
+            </div>
+        </div>
+        
+        <div class="quick-replies">
+            <div class="quick-reply">Fee payment deadline</div>
+            <div class="quick-reply">Scholarship form</div>
+            <div class="quick-reply">Exam timetable</div>
+            <div class="quick-reply">Library hours</div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Type your question here...">
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatBox = document.getElementById('chat-box');
+            const userInput = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+            const langButtons = document.querySelectorAll('.lang-btn');
+            const quickReplies = document.querySelectorAll('.quick-reply');
+            
+            let currentLanguage = 'en';
+            
+            // Sample responses in different languages
+            const responses = {
+                en: {
+                    greeting: "Hello! I'm your campus assistant. How can I help you today?",
+                    fee: "The fee payment deadline is 15th September. You can pay online through the student portal or at the finance office.",
+                    scholarship: "Scholarship applications are open until 30th September. You can find the form in the student portal under the 'Scholarships' section.",
+                    timetable: "The exam timetable will be published next week. Please check the notice board or the college website for updates.",
+                    library: "The library is open from 8 AM to 8 PM on weekdays and 9 AM to 5 PM on weekends.",
+                    fallback: "I'm not sure about that. Would you like me to connect you with a human representative?",
+                    thanks: "You're welcome! Is there anything else I can help with?",
+                    default: "I can help with information about fees, scholarships, timetables, and more. What do you need to know?"
+                },
+                hi: {
+                    greeting: "नमस्ते! मैं आपका कैंपस सहायक हूं। आज मैं आपकी कैसे मदद कर सकता हूं?",
+                    fee: "फीस भुगतान की अंतिम तिथि 15 सितंबर है। आप छात्र पोर्टल के माध्यम से ऑनलाइन या वित्त कार्यालय में भुगतान कर सकते हैं।",
+                    scholarship: "छात्रवृत्ति के आवेदन 30 सितंबर तक खुले हैं। आप फॉर्म छात्र पोर्टल में 'छात्रवृत्ति' अनुभाग के अंतर्गत पा सकते हैं।",
+                    timetable: "परीक्षा की समय सारणी अगले सप्ताह प्रकाशित की जाएगी। कृपया अपडेट के लिए नोटिस बोर्ड या कॉलेज की वेबसाइट देखें।",
+                    library: "लाइब्रेरी सप्ताह के दिनों में सुबह 8 बजे से रात 8 बजे तक और सप्ताहांत में सुबह 9 बजे से शाम 5 बजे तक खुली रहती है।",
+                    fallback: "मुझे इस बारे में यकीन नहीं है। क्या आप चाहेंगे कि मैं आपको एक मानव प्रतिनिधि से जोड़ूं?",
+                    thanks: "आपका स्वागत है! क्या मैं आपकी और किसी बात में मदद कर सकता हूं?",
+                    default: "मैं फीस, छात्रवृत्ति, समय सारणी और अन्य के बारे में जानकारी देने में मदद कर सकता हूं। आप क्या जानना चाहते हैं?"
+                },
+                ta: {
+                    greeting: "வணக்கம்! நான் உங்கள் வளாக உதவியாளர். இன்று நான் உங்களுக்கு எவ்வாறு உதவலாம்?",
+                    fee: "கட்டணம் செலுத்தும் காலக்கெடு செப்டம்பர் 15 ஆம் தேதி. மாணவர் போர்ட்டல் மூலம் ஆன்லைனில் அல்லது நிதி அலுவலகத்தில் நீங்கள் செலுத்தலாம்.",
+                    scholarship: "படிப்புதவி விண்ணப்பங்கள் செப்டம்பர் 30 வரை திறக்கப்படும். 'படிப்புதவிகள்' பிரிவின் கீழ் மாணவர் போர்ட்டலில் படிவத்தைக் காணலாம்.",
+                    timetable: "தேர்வு நேரக்கட்டுப்பாடு அடுத்த வாரம் வெளியிடப்படும். புதுப்பிப்புகளுக்கு அறிவிப்பு பலகை அல்லது கல்லூரி வலைத்தளத்தைப் பார்க்கவும்.",
+                    library: "நாள்தோறும் காலை 8 மணி முதல் இரவு 8 மணி வரையும், வார இறுதி நாட்களில் காலை 9 மணி முதல் மாலை 5 மணி வரையும் நூலகம் திறக்கப்படும்.",
+                    fallback: "அதைப் பற்றி எனக்குத் தெரியாது. மனித பிரதிநிதியுடன் உங்களை இணைக்க விரும்புகிறீர்களா?",
+                    thanks: "வரவேற்கிறோம்! வேறு ஏதாவது உதவி தேவையா?",
+                    default: "கட்டணம், படிப்புதவிகள், நேரக்கட்டுப்பாடு மற்றும் பலவற்றைப் பற்றிய தகவல்களை வழங்க என்னால் உதவ முடியும். நீங்கள் என்ன தெரிந்து கொள்ள வேண்டும்?"
+                }
+            };
+            
+            // Language switching
+            langButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    langButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    currentLanguage = this.getAttribute('data-lang');
+                    addMessage(responses[currentLanguage].default, 'bot');
+                });
+            });
+            
+            // Quick replies
+            quickReplies.forEach(reply => {
+                reply.addEventListener('click', function() {
+                    userInput.value = this.textContent;
+                    sendMessage();
+                });
+            });
+            
+            // Send message on button click
+            sendBtn.addEventListener('click', sendMessage);
+            
+            // Send message on Enter key
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+            
+            function sendMessage() {
+                const message = userInput.value.trim();
+                if (message) {
+                    addMessage(message, 'user');
+                    userInput.value = '';
+                    
+                    // Simulate thinking delay
+                    setTimeout(() => {
+                        let response = generateResponse(message, currentLanguage);
+                        addMessage(response, 'bot');
+                    }, 1000);
+                }
+            }
+            
+            function addMessage(text, sender) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message');
+                messageElement.classList.add(sender + '-message');
+                messageElement.textContent = text;
+                
+                const timestamp = document.createElement('div');
+                timestamp.classList.add('timestamp');
+                timestamp.textContent = getCurrentTime();
+                messageElement.appendChild(timestamp);
+                
+                chatBox.appendChild(messageElement);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+            
+            function getCurrentTime() {
+                const now = new Date();
+                return now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            }
+            
+            function generateResponse(message, language) {
+                const lowerMsg = message.toLowerCase();
+                
+                if (lowerMsg.includes('fee') || lowerMsg.includes('payment') || lowerMsg.includes('deadline')) {
+                    return responses[language].fee;
+                } else if (lowerMsg.includes('scholarship') || lowerMsg.includes('form')) {
+                    return responses[language].scholarship;
+                } else if (lowerMsg.includes('timetable') || lowerMsg.includes('exam') || lowerMsg.includes('schedule')) {
+                    return responses[language].timetable;
+                } else if (lowerMsg.includes('library') || lowerMsg.includes('hours') || lowerMsg.includes('time')) {
+                    return responses[language].library;
+                } else if (lowerMsg.includes('thank')) {
+                    return responses[language].thanks;
+                } else {
+                    return responses[language].fallback;
+                }
+            }
+            
+            // Add initial bot message with current language
+            addMessage(responses[currentLanguage].greeting, 'bot');
+        });
+    </script>
+</body>
+</html>
